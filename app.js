@@ -39,4 +39,13 @@ function exitProgram() {
   process.exit(0);
 }
 
+function processCommand(command) {
+  if (command === '.exit') {
+    exitProgram();
+  } else {
+
+    rl.prompt();
+  }
+}
+
 rl.prompt();
