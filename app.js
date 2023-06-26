@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const systemInfo = require('./system_info');
 
 let username = '';
 
@@ -16,8 +17,12 @@ if (username === '') {
 
 console.log(`Welcome to the File Manager, ${username}!`);
 
-const startDirectory = process.cwd();
-console.log(`You are currently in ${startDirectory}`);
+function printCurrentDirectory() {
+  const currentDirectory = process.cwd();
+  console.log(`You are currently in ${currentDirectory}`);
+}
+
+printCurrentDirectory();
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -30,22 +35,33 @@ rl.on('line', (line) => {
 });
 
 rl.on('SIGINT', () => {
-  console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
-  process.exit(0);
+  exitProgram();
 });
+
+const commandActions = {
+  '.exit': exitProgram,
+  'os --info': systemInfo.getOperatingSystemInfo,
+  'os --eol': systemInfo.getEndOfLine,
+  'os --cpus': systemInfo.getCPUsInfo,
+  'os --homedir': systemInfo.getHomeDirectory,
+  'os --username': systemInfo.getCurrentSystemUsername,
+  'os --architecture': systemInfo.getCPUArchitecture,
+};
+
+function processCommand(command) {
+  const action = commandActions[command];
+  if (action) {
+    action();
+  } else {
+    console.log('Invalid input');
+  }
+  printCurrentDirectory();
+  rl.prompt();
+}
 
 function exitProgram() {
   console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
   process.exit(0);
-}
-
-function processCommand(command) {
-  if (command === '.exit') {
-    exitProgram();
-  } else {
-
-    rl.prompt();
-  }
 }
 
 rl.prompt();
