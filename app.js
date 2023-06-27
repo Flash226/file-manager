@@ -6,7 +6,6 @@ const systemInfo = require('./system_info');
 const navigation = require('./navigation');
 const fileFunctions = require('./file_functions');
 const calculateHash = require('./calculate_hash');
-const compression = require('./compressing');
 
 const initialWorkingDirectory = os.homedir();
 process.chdir(initialWorkingDirectory);
