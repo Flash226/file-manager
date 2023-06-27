@@ -5,6 +5,8 @@ const readline = require('readline');
 const systemInfo = require('./system_info');
 const navigation = require('./navigation');
 const fileFunctions = require('./file_functions');
+const calculateHash = require('./calculate_hash');
+
 
 const initialWorkingDirectory = os.homedir();
 process.chdir(initialWorkingDirectory);
@@ -140,6 +142,14 @@ function processCommand(command) {
       fileFunctions.rm(fileName);
     } else {
       console.log('Please provide a file name.');
+    }
+  } else if (command.startsWith('hash ')) {
+    const filePath = command.slice(5).trim();
+    if (filePath) {
+      calculateHash(filePath);
+    } else {
+      console.log('Please provide a file path.');
+      rl.prompt();
     }
   } else {
     console.log('Invalid input');
