@@ -4,6 +4,7 @@ const path = require('path');
 const readline = require('readline');
 const systemInfo = require('./system_info');
 const navigation = require('./navigation');
+const fileFunctions = require('./file_functions');
 
 const initialWorkingDirectory = os.homedir();
 process.chdir(initialWorkingDirectory);
@@ -12,7 +13,9 @@ const rootDirectory = getRootDirectory(initialWorkingDirectory);
 
 let username = '';
 
-const usernameIndex = process.argv.findIndex(arg => arg.startsWith('--username='));
+const usernameIndex = process.argv.findIndex((arg) =>
+  arg.startsWith('--username=')
+);
 
 if (usernameIndex !== -1) {
   username = process.argv[usernameIndex].split('=')[1];
@@ -53,9 +56,15 @@ const commandActions = {
   'os --homedir': systemInfo.getHomeDirectory,
   'os --username': systemInfo.getCurrentSystemUsername,
   'os --architecture': systemInfo.getCPUArchitecture,
-  'up': navigation.goToParentDirectory,
-  'cd': navigation.goToDirectory,
-  'ls': navigation.listDirectory,
+  up: navigation.goToParentDirectory,
+  cd: navigation.goToDirectory,
+  ls: navigation.listDirectory,
+  cat: fileFunctions.cat,
+  add: fileFunctions.add,
+  rn: fileFunctions.rn,
+  cp: fileFunctions.cp,
+  mv: fileFunctions.mv,
+  rm: fileFunctions.rm,
 };
 
 function processCommand(command) {
@@ -76,12 +85,70 @@ function processCommand(command) {
     if (!isRootDirectory(process.cwd())) {
       navigation.goUp();
     }
+  } else if (command.trim() === 'add') {
+    console.log('Please provide a file name.');
+  } else if (command.startsWith('add ')) {
+    const fileName = command.slice(4).trim();
+    if (fileName) {
+      fileFunctions.add(fileName);
+    } else {
+      console.log('Please provide a file name.');
+    }
+  } else if (command.startsWith('cat')) {
+    const fileName = command.slice(4).trim();
+    if (fileName) {
+      const filePath = path.join(process.cwd(), fileName);
+      fileFunctions.cat(filePath, () => {
+        printCurrentDirectory();
+        rl.prompt();
+      });
+    } else {
+      console.log('Please provide a file name.');
+      printCurrentDirectory();
+      rl.prompt();
+    }
+  } else if (command.startsWith('rn')) {
+    const fileNames = command.slice(2).trim().split(' ');
+    const oldFileName = fileNames[0];
+    const newFileName = fileNames[1];
+    if (oldFileName && newFileName) {
+      fileFunctions.rn(oldFileName, newFileName);
+    } else {
+      console.log('Please provide both old and new file names.');
+    }
+  } else if (command.startsWith('cp')) {
+    const fileNames = command.slice(2).trim().split(' ');
+    const sourceFile = fileNames[0];
+    const destinationFile = fileNames[1];
+    if (sourceFile && destinationFile) {
+      fileFunctions.cp(sourceFile, destinationFile);
+    } else {
+      console.log('Please provide both source and destination file names.');
+    }
+  } else if (command.startsWith('mv')) {
+    const fileNames = command.slice(2).trim().split(' ');
+    const sourceFile = fileNames[0];
+    const destinationFile = fileNames[1];
+    if (sourceFile && destinationFile) {
+      fileFunctions.mv(sourceFile, destinationFile);
+    } else {
+      console.log('Please provide both source and destination file names.');
+    }
+  } else if (command.startsWith('rm')) {
+    const fileName = command.slice(2).trim();
+    if (fileName) {
+      fileFunctions.rm(fileName);
+    } else {
+      console.log('Please provide a file name.');
+    }
   } else {
     console.log('Invalid input');
   }
   printCurrentDirectory();
   rl.prompt();
 }
+
+
 
 function exitProgram() {
   console.log(`\nThank you for using File Manager, ${username}, goodbye!`);

@@ -21,9 +21,9 @@ function goToDirectory(directoryPath) {
   const targetDirectory = path.join(currentDirectory, directoryPath);
 
   if (!fs.existsSync(targetDirectory)) {
-    console.log(`Directory '${directoryPath}' does not exist`);
+    console.log(`Operation failed: Directory '${directoryPath}' does not exist`);
   } else if (!fs.statSync(targetDirectory).isDirectory()) {
-    console.log(`'${directoryPath}' is not a valid directory`);
+    console.log(`Operation failed: '${directoryPath}' is not a valid directory`);
   } else {
     try {
       process.chdir(targetDirectory);
