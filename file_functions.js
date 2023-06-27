@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { Readable, Writable } = require('stream');
 
-function cat(filePath) {
+function cat(filePath, callback) {
   const readableStream = fs.createReadStream(filePath);
 
   readableStream.on('data', (chunk) => {
@@ -12,18 +12,23 @@ function cat(filePath) {
   readableStream.on('error', (error) => {
     console.error('Error reading file:', error.message);
   });
+
+  readableStream.on('end', () => {
+    callback();
+  });
 }
 
-async function add(fileName) {
+function add(fileName) {
   const filePath = path.join(process.cwd(), fileName);
 
   try {
-    await fs.promises.writeFile(filePath, '');
+    fs.writeFileSync(filePath, '');
     console.log(`File '${fileName}' created successfully`);
   } catch (error) {
     console.error('Error creating file:', error.message);
   }
 }
+
 
 async function rn(oldFilePath, newFileName) {
   const oldPath = path.resolve(process.cwd(), oldFilePath);

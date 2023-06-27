@@ -17,13 +17,12 @@ function goUp() {
 }
 
 function goToDirectory(directoryPath) {
-  const currentDirectory = process.cwd();
-  const targetDirectory = path.join(currentDirectory, directoryPath);
+  const targetDirectory = path.resolve(process.cwd(), directoryPath);
 
   if (!fs.existsSync(targetDirectory)) {
-    console.log(`Operation failed: Directory '${directoryPath}' does not exist`);
+    console.log(`Operation failed: Directory '${targetDirectory}' does not exist`);
   } else if (!fs.statSync(targetDirectory).isDirectory()) {
-    console.log(`Operation failed: '${directoryPath}' is not a valid directory`);
+    console.log(`Operation failed: '${targetDirectory}' is not a valid directory`);
   } else {
     try {
       process.chdir(targetDirectory);
@@ -32,6 +31,7 @@ function goToDirectory(directoryPath) {
     }
   }
 }
+
 
 function listDirectory() {
   const currentDirectory = process.cwd();
