@@ -18,19 +18,22 @@ function cat(filePath, callback) {
   });
 }
 
-function add(fileName) {
+function add(fileName, callback) {
   const filePath = path.join(process.cwd(), fileName);
 
-  try {
-    fs.writeFileSync(filePath, '');
-    console.log(`File '${fileName}' created successfully`);
-  } catch (error) {
-    console.error('Error creating file:', error.message);
-  }
+  fs.writeFile(filePath, '', (error) => {
+    if (error) {
+      console.error('Error creating file:', error.message);
+    } else {
+      console.log(`File '${fileName}' created successfully`);
+    }
+    callback();
+  });
 }
 
 
-async function rn(oldFilePath, newFileName) {
+
+async function rn(oldFilePath, newFileName, callback) {
   const oldPath = path.resolve(process.cwd(), oldFilePath);
   const newPath = path.join(process.cwd(), newFileName);
 
@@ -40,9 +43,10 @@ async function rn(oldFilePath, newFileName) {
   } catch (error) {
     console.error('Error renaming file:', error.message);
   }
+  callback();
 }
 
-async function cp(sourceFilePath, destinationDirectory) {
+async function cp(sourceFilePath, destinationDirectory, callback) {
   const sourcePath = path.resolve(process.cwd(), sourceFilePath);
   const destinationPath = path.resolve(process.cwd(), destinationDirectory, path.basename(sourcePath));
 
@@ -61,10 +65,11 @@ async function cp(sourceFilePath, destinationDirectory) {
 
   writableStream.on('finish', () => {
     console.log(`File '${sourceFilePath}' copied to '${destinationDirectory}' successfully`);
+    callback();
   });
 }
 
-async function mv(sourceFilePath, destinationDirectory) {
+async function mv(sourceFilePath, destinationDirectory, callback) {
   const sourcePath = path.resolve(process.cwd(), sourceFilePath);
   const destinationPath = path.resolve(process.cwd(), destinationDirectory, path.basename(sourcePath));
 
@@ -88,10 +93,11 @@ async function mv(sourceFilePath, destinationDirectory) {
     } catch (error) {
       console.error('Error moving file:', error.message);
     }
+    callback();
   });
 }
 
-async function rm(filePath) {
+async function rm(filePath, callback) {
   const fullPath = path.resolve(process.cwd(), filePath);
 
   try {
@@ -100,7 +106,9 @@ async function rm(filePath) {
   } catch (error) {
     console.error('Error deleting file:', error.message);
   }
+  callback();
 }
+
 
 module.exports = {
   cat,

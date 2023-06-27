@@ -49,26 +49,8 @@ rl.on('SIGINT', () => {
   exitProgram();
 });
 
-const commandActions = {
-  '.exit': exitProgram,
-  'os --info': systemInfo.getOperatingSystemInfo,
-  'os --eol': systemInfo.getEndOfLine,
-  'os --cpus': systemInfo.getCPUsInfo,
-  'os --homedir': systemInfo.getHomeDirectory,
-  'os --username': systemInfo.getCurrentSystemUsername,
-  'os --architecture': systemInfo.getCPUArchitecture,
-  up: navigation.goToParentDirectory,
-  cd: navigation.goToDirectory,
-  ls: navigation.listDirectory,
-  cat: fileFunctions.cat,
-  add: fileFunctions.add,
-  rn: fileFunctions.rn,
-  cp: fileFunctions.cp,
-  mv: fileFunctions.mv,
-  rm: fileFunctions.rm,
-};
-
 function processCommand(command) {
+  let operationCompleted = true;
   const commandActions = {
     cd: ([directoryPath]) => {
       if (directoryPath) {
@@ -100,15 +82,21 @@ function processCommand(command) {
       if (fileName.length !== 1) {
         console.log('Invalid input: Please provide a correct file name.');
       } else {
-        fileFunctions.add(fileName[0]);
+        operationCompleted = false;
+        fileFunctions.add(fileName[0], () => {
+          printCurrentDirectory();
+          rl.prompt();
+        });
       }
     },
     cat: (fileName) => {
       if (fileName.length !== 1) {
         console.log('Invalid input: Please provide a correct file name.');
       } else {
+        operationCompleted = false;
         const filePath = path.join(process.cwd(), fileName[0]);
         fileFunctions.cat(filePath, () => {
+          console.log();
           printCurrentDirectory();
           rl.prompt();
           return;
@@ -119,7 +107,11 @@ function processCommand(command) {
       const oldFileName = fileNames[0];
       const newFileName = fileNames[1];
       if (oldFileName && newFileName) {
-        fileFunctions.rn(oldFileName, newFileName);
+        operationCompleted = false;
+        fileFunctions.rn(oldFileName, newFileName, () => {
+          printCurrentDirectory();
+          rl.prompt();
+        });
       } else {
         console.log('Invalid input: Please provide both old and new file names.');
       }
@@ -128,7 +120,11 @@ function processCommand(command) {
       const sourceFile = fileNames[0];
       const destinationFile = fileNames[1];
       if (sourceFile && destinationFile) {
-        fileFunctions.cp(sourceFile, destinationFile);
+        operationCompleted = false;
+        fileFunctions.cp(sourceFile, destinationFile, () => {
+          printCurrentDirectory();
+          rl.prompt();
+        });
       } else {
         console.log('Invalid input: Please provide both source and destination file names.');
       }
@@ -137,7 +133,11 @@ function processCommand(command) {
       const sourceFile = fileNames[0];
       const destinationFile = fileNames[1];
       if (sourceFile && destinationFile) {
-        fileFunctions.mv(sourceFile, destinationFile);
+        operationCompleted = false;
+        fileFunctions.mv(sourceFile, destinationFile, () => {
+          printCurrentDirectory();
+          rl.prompt();
+        });
       } else {
         console.log('Invalid input: Please provide both source and destination file names.');
       }
@@ -146,7 +146,11 @@ function processCommand(command) {
       if (fileName.length !== 1) {
         console.log('Invalid input: Please provide a correct file name.');
       } else {
-        fileFunctions.rm(fileName[0]);
+        operationCompleted = false;
+        fileFunctions.rm(fileName[0], () => {
+          printCurrentDirectory();
+          rl.prompt();
+        });
       }
     },
     hash: (fileName) => {
@@ -172,6 +176,7 @@ function processCommand(command) {
   const commandArgs = commandParts.slice(1);
 
   const action = commandActions[commandName];
+  
   if (action) {
     if (typeof action === 'function') {
       action(commandArgs);
@@ -190,8 +195,10 @@ function processCommand(command) {
     console.log('Invalid input');
   }
 
-  printCurrentDirectory();
-  rl.prompt();
+  if (operationCompleted) {
+    printCurrentDirectory();
+    rl.prompt();
+  }
 }
 
 function exitProgram() {
