@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const { Readable, Writable } = require('stream');
+import fs from 'fs';
+import path from 'path';
+import { Readable, Writable } from 'stream';
 
-function cat(filePath, callback) {
+const cat = (filePath, callback) => {
   const readableStream = fs.createReadStream(filePath);
 
   readableStream.on('data', (chunk) => {
@@ -16,9 +16,9 @@ function cat(filePath, callback) {
   readableStream.on('end', () => {
     callback();
   });
-}
+};
 
-function add(fileName, callback) {
+const add = (fileName, callback) => {
   const filePath = path.join(process.cwd(), fileName);
 
   fs.writeFile(filePath, '', (error) => {
@@ -29,11 +29,9 @@ function add(fileName, callback) {
     }
     callback();
   });
-}
+};
 
-
-
-async function rn(oldFilePath, newFileName, callback) {
+const rn = async (oldFilePath, newFileName, callback) => {
   const oldPath = path.resolve(process.cwd(), oldFilePath);
   const newPath = path.join(process.cwd(), newFileName);
 
@@ -44,9 +42,9 @@ async function rn(oldFilePath, newFileName, callback) {
     console.error('Error renaming file:', error.message);
   }
   callback();
-}
+};
 
-async function cp(sourceFilePath, destinationDirectory, callback) {
+const cp = async (sourceFilePath, destinationDirectory, callback) => {
   const sourcePath = path.resolve(process.cwd(), sourceFilePath);
   const destinationPath = path.resolve(process.cwd(), destinationDirectory, path.basename(sourcePath));
 
@@ -67,9 +65,9 @@ async function cp(sourceFilePath, destinationDirectory, callback) {
     console.log(`File '${sourceFilePath}' copied to '${destinationDirectory}' successfully`);
     callback();
   });
-}
+};
 
-async function mv(sourceFilePath, destinationDirectory, callback) {
+const mv = async (sourceFilePath, destinationDirectory, callback) => {
   const sourcePath = path.resolve(process.cwd(), sourceFilePath);
   const destinationPath = path.resolve(process.cwd(), destinationDirectory, path.basename(sourcePath));
 
@@ -95,9 +93,9 @@ async function mv(sourceFilePath, destinationDirectory, callback) {
     }
     callback();
   });
-}
+};
 
-async function rm(filePath, callback) {
+const rm = async (filePath, callback) => {
   const fullPath = path.resolve(process.cwd(), filePath);
 
   try {
@@ -107,10 +105,9 @@ async function rm(filePath, callback) {
     console.error('Error deleting file:', error.message);
   }
   callback();
-}
+};
 
-
-module.exports = {
+export {
   cat,
   add,
   rn,

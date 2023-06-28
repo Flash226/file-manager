@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-function goUp() {
+const goUp = () => {
   const currentDirectory = process.cwd();
   const parentDirectory = path.resolve(currentDirectory, '..');
 
@@ -14,9 +14,9 @@ function goUp() {
       console.log('Operation failed:', error.message);
     }
   }
-}
+};
 
-function goToDirectory(directoryPath) {
+const goToDirectory = (directoryPath) => {
   const targetDirectory = path.resolve(process.cwd(), directoryPath);
 
   if (!fs.existsSync(targetDirectory)) {
@@ -30,10 +30,9 @@ function goToDirectory(directoryPath) {
       console.log('Operation failed:', error.message);
     }
   }
-}
+};
 
-
-function listDirectory() {
+const listDirectory = () => {
   const currentDirectory = process.cwd();
   try {
     const directoryContent = fs.readdirSync(currentDirectory);
@@ -71,19 +70,19 @@ function listDirectory() {
   } catch (error) {
     console.log('Operation failed:', error.message);
   }
-}
+};
 
-function isRootDirectory(directoryPath) {
+const isRootDirectory = (directoryPath) => {
   const rootDirectory = getRootDirectory(directoryPath);
   return directoryPath === rootDirectory;
-}
+};
 
-function getRootDirectory(directoryPath) {
+const getRootDirectory = (directoryPath) => {
   const rootPath = path.parse(directoryPath).root;
   return rootPath;
-}
+};
 
-module.exports = {
+export {
   goUp,
   goToDirectory,
   listDirectory,

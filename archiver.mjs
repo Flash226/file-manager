@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const zlib = require('zlib');
+import fs from 'fs';
+import path from 'path';
+import zlib from 'zlib';
 
-function compress(filePath, destinationPath, callback) {
+export function compress(filePath, destinationPath, callback) {
   const sourcePath = path.resolve(process.cwd(), filePath);
   const sourceFileName = path.basename(filePath);
   const destinationDirectoryPath = path.resolve(process.cwd(), destinationPath);
@@ -27,8 +27,7 @@ function compress(filePath, destinationPath, callback) {
   });
 }
 
-
-function decompress(filePath, destinationPath, callback) {
+export function decompress(filePath, destinationPath, callback) {
   const sourcePath = path.resolve(process.cwd(), filePath);
   const sourceFileName = path.basename(filePath);
   const destinationDirectoryPath = path.resolve(process.cwd(), destinationPath);
@@ -52,9 +51,3 @@ function decompress(filePath, destinationPath, callback) {
     console.error('Error decompressing file:', error.message);
   });
 }
-
-
-module.exports = {
-  compress,
-  decompress
-};

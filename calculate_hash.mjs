@@ -1,7 +1,7 @@
-const fs = require('fs');
-const crypto = require('crypto');
+import fs from 'fs';
+import crypto from 'crypto';
 
-function calculateHash(filePath) {
+const calculateHash = (filePath) => {
   const algorithm = 'sha256';
   const hash = crypto.createHash(algorithm);
 
@@ -18,6 +18,6 @@ function calculateHash(filePath) {
       console.log('Error reading file:', error.message);
     }
   }
-}
+};
 
-module.exports = calculateHash;
+export { calculateHash };

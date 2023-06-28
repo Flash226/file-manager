@@ -1,63 +1,49 @@
-const os = require('os');
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
-const systemInfo = require('./system_info');
-const navigation = require('./navigation');
-const fileFunctions = require('./file_functions');
-const calculateHash = require('./calculate_hash');
-const archiver = require('./archiver');
+import path from 'path';
+import os from 'os';
+import {
+  goUp,
+  goToDirectory,
+  listDirectory
+} from './navigation.mjs';
+import {
+  cat,
+  add,
+  rn,
+  cp,
+  mv,
+  rm
+} from './file_functions.mjs';
+import {
+  compress,
+  decompress
+} from './archiver.mjs';
+import { calculateHash } from './calculate_hash.mjs';
+import {
+  getOperatingSystemInfo,
+  getEndOfLine,
+  getCPUsInfo,
+  getHomeDirectory,
+  getCurrentSystemUsername,
+  getCPUArchitecture
+} from './system_info.mjs';
+import {
+  printCurrentDirectory,
+  getRootDirectory,
+  isSubdirectory,
+  isRootDirectory,
+  getUsername,
+} from './shared_functions.mjs';
 
-const initialWorkingDirectory = os.homedir();
-process.chdir(initialWorkingDirectory);
+const rootDirectory = getRootDirectory(os.homedir());
 
-const rootDirectory = getRootDirectory(initialWorkingDirectory);
-
-let username = '';
-
-const usernameIndex = process.argv.findIndex((arg) =>
-  arg.startsWith('--username=')
-);
-
-if (usernameIndex !== -1) {
-  username = process.argv[usernameIndex].split('=')[1];
-}
-
-if (username === '') {
-  username = 'Not entered username';
-}
-
-console.log(`Welcome to the File Manager, ${username}!`);
-
-function printCurrentDirectory() {
-  const currentDirectory = process.cwd();
-  console.log(`You are currently in ${currentDirectory}`);
-}
-
-printCurrentDirectory();
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  prompt: 'Enter a command: ',
-});
-
-rl.on('line', (line) => {
-  processCommand(line.trim());
-});
-
-rl.on('SIGINT', () => {
-  exitProgram();
-});
-
-function processCommand(command) {
+const processCommand = (command, rl) => {
   let operationCompleted = true;
   const commandActions = {
     cd: ([directoryPath]) => {
       if (directoryPath) {
         const targetDirectory = path.resolve(process.cwd(), directoryPath);
         if (isSubdirectory(targetDirectory, rootDirectory)) {
-          navigation.goToDirectory(directoryPath);
+          goToDirectory(directoryPath);
         }
       } else {
         console.log('Invalid input: Please provide a directory path.');
@@ -68,7 +54,7 @@ function processCommand(command) {
         console.log('Invalid input');
       } else {
         if (!isRootDirectory(process.cwd())) {
-          navigation.goUp();
+          goUp();
         }
       }
     },
@@ -76,7 +62,7 @@ function processCommand(command) {
       if (directoryPath) {
         console.log('Invalid input');
       } else {
-        navigation.listDirectory();
+        listDirectory();
       }
     },
     add: (fileName) => {
@@ -84,7 +70,7 @@ function processCommand(command) {
         console.log('Invalid input: Please provide a correct file name.');
       } else {
         operationCompleted = false;
-        fileFunctions.add(fileName[0], () => {
+        add(fileName[0], () => {
           printCurrentDirectory();
           rl.prompt();
         });
@@ -96,7 +82,7 @@ function processCommand(command) {
       } else {
         operationCompleted = false;
         const filePath = path.join(process.cwd(), fileName[0]);
-        fileFunctions.cat(filePath, () => {
+        cat(filePath, () => {
           console.log();
           printCurrentDirectory();
           rl.prompt();
@@ -109,7 +95,7 @@ function processCommand(command) {
       const newFileName = fileNames[1];
       if (oldFileName && newFileName) {
         operationCompleted = false;
-        fileFunctions.rn(oldFileName, newFileName, () => {
+        rn(oldFileName, newFileName, () => {
           printCurrentDirectory();
           rl.prompt();
         });
@@ -122,7 +108,7 @@ function processCommand(command) {
       const destinationFile = fileNames[1];
       if (sourceFile && destinationFile) {
         operationCompleted = false;
-        fileFunctions.cp(sourceFile, destinationFile, () => {
+        cp(sourceFile, destinationFile, () => {
           printCurrentDirectory();
           rl.prompt();
         });
@@ -135,7 +121,7 @@ function processCommand(command) {
       const destinationFile = fileNames[1];
       if (sourceFile && destinationFile) {
         operationCompleted = false;
-        fileFunctions.mv(sourceFile, destinationFile, () => {
+        mv(sourceFile, destinationFile, () => {
           printCurrentDirectory();
           rl.prompt();
         });
@@ -148,7 +134,7 @@ function processCommand(command) {
         console.log('Invalid input: Please provide a correct file name.');
       } else {
         operationCompleted = false;
-        fileFunctions.rm(fileName[0], () => {
+        rm(fileName[0], () => {
           printCurrentDirectory();
           rl.prompt();
         });
@@ -159,7 +145,7 @@ function processCommand(command) {
       const destinationFile = fileNames[1];
       if (sourceFile && destinationFile) {
         operationCompleted = false;
-        archiver.compress(sourceFile, destinationFile, () => {
+        compress(sourceFile, destinationFile, () => {
           printCurrentDirectory();
           rl.prompt();
         });
@@ -172,7 +158,7 @@ function processCommand(command) {
       const destinationFile = fileNames[1];
       if (sourceFile && destinationFile) {
         operationCompleted = false;
-        archiver.decompress(sourceFile, destinationFile, () => {
+        decompress(sourceFile, destinationFile, () => {
           printCurrentDirectory();
           rl.prompt();
         });
@@ -188,14 +174,14 @@ function processCommand(command) {
       }
     },
     os: {
-      '--info': systemInfo.getOperatingSystemInfo,
-      '--EOL': systemInfo.getEndOfLine,
-      '--cpus': systemInfo.getCPUsInfo,
-      '--homedir': systemInfo.getHomeDirectory,
-      '--username': systemInfo.getCurrentSystemUsername,
-      '--architecture': systemInfo.getCPUArchitecture,
+      '--info': getOperatingSystemInfo,
+      '--EOL': getEndOfLine,
+      '--cpus': getCPUsInfo,
+      '--homedir': getHomeDirectory,
+      '--username': getCurrentSystemUsername,
+      '--architecture': getCPUArchitecture
     },
-    '.exit': exitProgram,
+    '.exit': exitProgram
   };
 
   const commandParts = command.trim().split(' ');
@@ -203,7 +189,7 @@ function processCommand(command) {
   const commandArgs = commandParts.slice(1);
 
   const action = commandActions[commandName];
-  
+
   if (action) {
     if (typeof action === 'function') {
       action(commandArgs);
@@ -226,26 +212,23 @@ function processCommand(command) {
     printCurrentDirectory();
     rl.prompt();
   }
-}
+};
 
-function exitProgram() {
-  console.log(`\nThank you for using File Manager, ${username}, goodbye!`);
+const startCommandProcessor = (rl) => {
+  rl.on('line', (line) => {
+    processCommand(line.trim(), rl);
+  });
+
+  rl.prompt();
+};
+
+const exitProgram = () => {
+  console.log(`\nThank you for using File Manager, ${getUsername()}, goodbye!`);
   process.exit(0);
-}
+};
 
-function getRootDirectory(directoryPath) {
-  const rootPath = path.parse(directoryPath).root;
-  return rootPath;
-}
-
-function isSubdirectory(childPath, parentPath) {
-  const relativePath = path.relative(parentPath, childPath);
-  return !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
-}
-
-function isRootDirectory(directoryPath) {
-  const rootDirectory = getRootDirectory(directoryPath);
-  return directoryPath === rootDirectory;
-}
-
-rl.prompt();
+export {
+  processCommand,
+  startCommandProcessor,
+  exitProgram
+};
