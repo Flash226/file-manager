@@ -6,6 +6,7 @@ const systemInfo = require('./system_info');
 const navigation = require('./navigation');
 const fileFunctions = require('./file_functions');
 const calculateHash = require('./calculate_hash');
+const archiver = require('./archiver');
 
 const initialWorkingDirectory = os.homedir();
 process.chdir(initialWorkingDirectory);
@@ -151,6 +152,32 @@ function processCommand(command) {
           printCurrentDirectory();
           rl.prompt();
         });
+      }
+    },
+    compress: (fileNames) => {
+      const sourceFile = fileNames[0];
+      const destinationFile = fileNames[1];
+      if (sourceFile && destinationFile) {
+        operationCompleted = false;
+        archiver.compress(sourceFile, destinationFile, () => {
+          printCurrentDirectory();
+          rl.prompt();
+        });
+      } else {
+        console.log('Invalid input: Please provide both source and destination file names.');
+      }
+    },
+    decompress: (fileNames) => {
+      const sourceFile = fileNames[0];
+      const destinationFile = fileNames[1];
+      if (sourceFile && destinationFile) {
+        operationCompleted = false;
+        archiver.decompress(sourceFile, destinationFile, () => {
+          printCurrentDirectory();
+          rl.prompt();
+        });
+      } else {
+        console.log('Invalid input: Please provide both source and destination file names.');
       }
     },
     hash: (fileName) => {
