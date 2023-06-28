@@ -189,7 +189,7 @@ function processCommand(command) {
     },
     os: {
       '--info': systemInfo.getOperatingSystemInfo,
-      '--eol': systemInfo.getEndOfLine,
+      '--EOL': systemInfo.getEndOfLine,
       '--cpus': systemInfo.getCPUsInfo,
       '--homedir': systemInfo.getHomeDirectory,
       '--username': systemInfo.getCurrentSystemUsername,
